@@ -8,12 +8,6 @@
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
-.skip-link {                     /* appears only when keyboard-focused */
-  position: absolute; left: var(--space-1); top: -10rem; z-index: 100;
-  padding: var(--space-2); background: var(--color-primary); color: var(--color-on-primary);
-  font-weight: 700; border-radius: var(--radius);
-}
-.skip-link:focus { top: var(--space-1); }
 
 /* Visible keyboard focus on EVERY interactive element (WCAG 2.4.7). */
 :focus-visible {
@@ -152,7 +146,7 @@ dialog::backdrop { background: rgb(0 0 0 / 0.75); }
 .choice input { width: 1.75rem; height: 1.75rem; flex: none; accent-color: var(--color-primary); }
 .choice:has(input:checked) { border-color: var(--color-primary); background: var(--color-term-bg); font-weight: 700; }
 
-/* ---------- JavaScript-disabled warning ---------- */
+/* ---------- JavaScript-disabled warning (safety net before the redirect) ---------- */
 .noscript-warning {
   margin: var(--space-2); padding: var(--space-3);
   font-size: 1.4rem; line-height: 1.6;
@@ -160,9 +154,22 @@ dialog::backdrop { background: rgb(0 0 0 / 0.75); }
   border: 6px solid var(--color-warn-border); border-radius: var(--radius);
 }
 .noscript-warning h1 { font-size: 2rem; margin-bottom: var(--space-2); }
+.noscript-warning a { color: inherit; font-weight: 700; }
 
 /* ---------- Respect "reduce motion" system setting (WCAG 2.3.3) ---------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
   .btn:active { transform: none; }
-},,,,,,,,,,,,,,,,,,,,,,,
+}
+
+/* ---------- Added in Stage 3a ---------- */
+/* Service card contents are <span>s, because a <button> may only contain
+   "phrasing content" in HTML (no <h3> or <p> inside it). */
+.service-card .card-title   { display: block; font-size: 1.5rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.25rem; }
+.service-card .card-summary { display: block; color: var(--color-muted); }
+
+/* Disabled buttons (e.g. Back on step 1) must look disabled. */
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+/* "Try again" button inside the Home status message. */
+#home-status .btn { margin-top: var(--space-1); }
