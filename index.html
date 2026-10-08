@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="standard">
+<head>
+  <meta charset="utf-8">
+  <!-- NO "user-scalable=no" or "maximum-scale": blocking pinch-zoom fails WCAG 1.4.4.
+       viewport-fit=cover lets us respect phone notches via env(safe-area-inset-*). -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>EASE</title>
+  <meta name="description" content="EASE helps older people use MoMo, NHIS and ECG services with simple steps, large buttons and voice control.">
+  <meta name="theme-color" content="#0b4f8a">
+
+  <!-- Apply saved preferences BEFORE first paint so the page never flashes the
+       wrong theme or size. Keys must match settings.js: "theme" and "pageScale". -->
+  <script>
+    try {
+      var t = localStorage.getItem('theme');
+      var z = parseFloat(localStorage.getItem('pageScale'));
+      if (t === 'standard' || t === 'high-contrast') document.documentElement.dataset.theme = t;
+      if (z >= 1 && z <= 2) document.documentElement.style.setProperty('--zoom', z);
+    } catch (e) { /* storage blocked: defaults are fine */ }
+  </script>
+
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+
+  <!-- Strict fallback: this style block exists ONLY when JavaScript is off.
+       It hides the whole app so the user sees just the warning below. -->
+  <noscript><style>#app { display: none !important; }</style></noscript>
+
+  <!-- type="module": its own scope, deferred by default (does not block parsing). -->
+  <script type="module" src="js/app.js"></script>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- Shown ONLY when JavaScript is disabled. Styled in components.css. -->
+  <noscript>
+    <div class="noscript-warning" role="alert">
+      <h1>EASE needs JavaScript</h1>
+      <p>This guide cannot work while JavaScript is turned off.</p>
+      <p>Please turn JavaScript on in your browser settings, then reload this page.</p>
+    </div>
+  </noscript>
+
+  <div id="app">
+
+    <!-- ============ HEADER ============ -->
+    <header class="app-header">
+      <h1 class="brand">
+        <span class="brand-name">EASE:</span>
+        <span class="brand-meaning">Elder Access and Service Engine</span>
+      </h1>
+      <div class="header-actions">
+        <!-- aria-pressed announces on/off state to screen readers; the label stays constant. -->
+        <button id="btn-mic" type="button" class="btn btn-secondary" aria-pressed="false">
+          <span aria-hidden="true">🎤</span> Voice control
+        </button>
+        <button id="btn-settings" type="button" class="btn btn-secondary" aria-haspopup="dialog">
+          <span aria-hidden="true">⚙</span> Settings
+        </button>
+      </div>
+      <p id="mic-status" class="mic-status" role="status"></p>
+    </header>
+
+    <!-- ============ MAIN ============ -->
+    <!-- tabindex="-1" lets JS move focus here after a view change (skip link target too). -->
+    <main id="main" tabindex="-1">
+
+      <!-- ---------- VIEW 1: HOME ---------- -->
+      <section id="view-home" class="view" aria-labelledby="home-heading">
+        <h2 id="home-heading">What would you like to do today?</h2>
+        <p class="lead">Tap a guide below. Each one shows you one step at a time.</p>
+
+        <p id="home-status" role="status">Loading your guides…</p>
+        <!-- role="list" restores list semantics in Safari/VoiceOver when list-style is removed. -->
+        <ul id="service-list" class="card-list" role="list"></ul>
+
+        <h2 id="tools-heading" class="section-gap">Tools</h2>
+        <button id="btn-open-magnifier" type="button" class="btn btn-primary btn-block">
+          <span aria-hidden="true">🔍</span> Magnify my ID card
+        </button>
+
+        <details class="voice-help section-gap">
+          <summary>What can I say?</summary>
+          <p>Tap <strong>Voice control</strong>, then say:</p>
+          <ul>
+            <li><strong>“Next”</strong> or <strong>“Back”</strong>: change step</li>
+            <li><strong>“Home”</strong>: return to this page</li>
+            <li><strong>“Zoom in”</strong> or <strong>“Zoom out”</strong>: make the page bigger or smaller</li>
+            <li><strong>“Read”</strong>: hear the current step</li>
+            <li><strong>“Take picture”</strong>: photograph your ID card</li>
+          </ul>
+        </details>
+      </section>
+
+      <!-- ---------- VIEW 2: GUIDE (one step at a time) ---------- -->
+      <section id="view-guide" class="view" aria-labelledby="guide-title" hidden>
+        <h2 id="guide-title"></h2>
+
+        <div class="progress-block">
+          <p id="step-counter" class="step-counter">Step <span id="step-current">1</span> of <span id="step-total">1</span></p>
+          <!-- Native <progress>: built-in semantics, no ARIA needed. -->
+          <progress id="step-progress" max="1" value="1" aria-label="Guide progress"></progress>
+        </div>
+
+        <article id="step-card" class="step-card">
+          <!-- Responsive image: JS fills srcset from image_base (e.g. nhis-1-480.webp 480w, nhis-1-960.webp 960w).
+               width/height reserve space so the page does not jump when the image loads. -->
+          <figure id="step-figure" class="step-figure" hidden>
+            <picture>
+              <source id="step-source" type="image/webp" sizes="(min-width: 48rem) 40rem, 100vw" srcset="">
+              <img id="step-image" alt="" width="960" height="640" loading="lazy" decoding="async"
+                   src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+            </picture>
+          </figure>
+
+          <p id="step-text" class="step-text"></p>
+
+          <div class="step-actions">
+            <button id="btn-listen" type="button" class="btn btn-secondary">
+              <span aria-hidden="true">🔊</span> Listen to this step
+            </button>
+            <!-- Native protocol link, e.g. tel:*929%23. JS sets href and label. -->
+            <a id="step-action" class="btn btn-action" href="#" hidden></a>
+          </div>
+
+          <!-- Dictionary answer appears here after tapping a highlighted word. -->
+          <div id="definition-panel" class="definition-panel" role="region" aria-label="Word meaning" hidden>
+            <p class="definition-term" id="definition-term"></p>
+            <p id="definition-text"></p>
+            <div class="button-row">
+              <button id="btn-read-definition" type="button" class="btn btn-secondary">
+                <span aria-hidden="true">🔊</span> Listen
+              </button>
+              <button id="btn-close-definition" type="button" class="btn btn-secondary">Close</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Tariff table (HTML5 table requirement). Filled by render.js from tariffs.php. -->
+        <section id="tariff-section" class="tariff-section" aria-labelledby="tariff-heading" hidden>
+          <h3 id="tariff-heading">Costs to expect</h3>
+          <table class="tariff-table">
+            <caption>Amounts in Ghana cedis (GH₵). These are examples; check your provider.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Note</th>
+              </tr>
+            </thead>
+            <tbody id="tariff-body"></tbody>
+          </table>
+        </section>
+      </section>
+
+      <!-- ---------- VIEW 3: ID MAGNIFIER ---------- -->
+      <section id="view-magnifier" class="view" aria-labelledby="magnifier-heading" hidden>
+        <h2 id="magnifier-heading">Magnify my ID card</h2>
+
+        <!-- Image sits FIRST so the thumb never scrolls past controls to see it. -->
+        <div class="magnifier-stage">
+          <div id="video-frame" class="video-frame">
+            <video id="camera-video" autoplay playsinline muted aria-label="Live camera view"></video>
+            <!-- Decorative box = the centre 50% that will be cropped and enlarged. -->
+            <div class="guide-box" aria-hidden="true"></div>
+          </div>
+          <img id="captured-image" class="captured-image" alt="Your ID card, enlarged" hidden
+               src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+        </div>
+
+        <p id="magnifier-help" class="lead">Hold your card inside the dashed box, then tap <strong>Take picture</strong>.</p>
+        <p id="camera-status" role="status"></p>
+
+        <div class="button-row">
+          <button id="btn-capture" type="button" class="btn btn-primary">
+            <span aria-hidden="true">📷</span> Take picture
+          </button>
+          <button id="btn-retake" type="button" class="btn btn-secondary" hidden>Take another</button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ============ BOTTOM NAV (sticky, thumb zone) ============ -->
+    <nav class="nav-bar" aria-label="Page navigation">
+      <button id="btn-back" type="button" class="btn btn-secondary" hidden>
+        <span aria-hidden="true">←</span> Back
+      </button>
+      <button id="btn-home" type="button" class="btn btn-secondary">
+        <span aria-hidden="true">🏠</span> Home
+      </button>
+      <button id="btn-next" type="button" class="btn btn-primary" hidden>
+        Next <span aria-hidden="true">→</span>
+      </button>
+    </nav>
+
+    <footer class="app-footer">
+      <p>Menus, short codes and prices can change. If something looks different on your phone, check with your provider.</p>
+      <p>EASE: a student project for older users in Ghana.</p>
+    </footer>
+
+    <!-- Invisible live region: JS writes "Step 3 of 6" here so screen readers announce changes. -->
+    <div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- ============ SETTINGS (native <dialog> + <form>) ============ -->
+    <!-- <dialog> gives focus trapping, Esc to close and backdrop for free. -->
+    <dialog id="settings-dialog" aria-labelledby="settings-title">
+      <form id="settings-form" method="dialog">
+        <h2 id="settings-title">Settings</h2>
+
+        <fieldset class="choice-group">
+          <legend>Text size</legend>
+          <label class="choice"><input type="radio" name="zoom" value="1" checked> Normal</label>
+          <label class="choice"><input type="radio" name="zoom" value="1.25"> Large</label>
+          <label class="choice"><input type="radio" name="zoom" value="1.5"> Larger</label>
+          <label class="choice"><input type="radio" name="zoom" value="1.75"> Very large</label>
+          <label class="choice"><input type="radio" name="zoom" value="2"> Largest</label>
+        </fieldset>
+
+        <fieldset class="choice-group">
+          <legend>Colours</legend>
+          <label class="choice"><input type="radio" name="theme" value="standard" checked> Standard</label>
+          <label class="choice"><input type="radio" name="theme" value="high-contrast"> High contrast (yellow on black)</label>
+        </fieldset>
+
+        <button type="submit" class="btn btn-primary btn-block">Done</button>
+      </form>
+    </dialog>
+
+  </div><!-- /#app -->
+</body>
+</html>

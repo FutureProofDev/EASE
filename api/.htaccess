@@ -1,0 +1,16 @@
+# Block directory listing (nobody should browse the api/ folder).
+Options -Indexes
+
+# These files are only ever include()d by other PHP files on the server.
+# Requesting them over HTTP is blocked with a 403 Forbidden.
+<FilesMatch "^(config|config\.sample|db|helpers)\.php$">
+    # Apache 2.4+ (XAMPP and Laragon use this)
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    # Apache 2.2 fallback (some older shared hosts)
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

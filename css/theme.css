@@ -1,0 +1,63 @@
+/* =====================================================================
+   theme.css: design tokens only (no layout, no components).
+   Every colour and size lives in a CSS variable on :root, so switching
+   theme = changing a few variables; the whole UI updates instantly.
+   All contrast ratios below are designed to pass WCAG AA (4.5:1 text,
+   3:1 for UI borders); the high-contrast theme targets AAA (7:1+).
+   ===================================================================== */
+
+:root {
+  /* Page zoom: the ONLY number the "Zoom in/out" feature changes. */
+  --zoom: 1;
+
+  /* ---- Standard theme ---- */
+  --color-bg:           #faf8f2;
+  --color-surface:      #ffffff;
+  --color-text:         #1b1b1b;   /* ~16:1 on bg */
+  --color-muted:        #454545;
+  --color-primary:      #0b4f8a;   /* ~8.4:1 vs white */
+  --color-on-primary:   #ffffff;
+  --color-action:       #1d6b34;   /* green: phone/dial buttons, ~6.5:1 vs white */
+  --color-on-action:    #ffffff;
+  --color-border:       #5a5a5a;
+  --color-focus:        #c2410c;   /* keyboard focus ring */
+  --color-term-bg:      #e3eefa;   /* highlight behind dictionary words */
+  --color-warn-bg:      #fff3cd;
+  --color-warn-border:  #8a1c1c;
+  --color-warn-text:    #3a0d0d;
+
+  /* ---- Sizing tokens (rem, so they scale with --zoom) ---- */
+  --tap:        3.75rem;   /* 60px "fat finger" minimum touch target at zoom 1 */
+  --radius:     0.75rem;
+  --space-1:    0.5rem;
+  --space-2:    1rem;
+  --space-3:    1.5rem;
+  --space-4:    2rem;
+  --border:     3px;       /* px on purpose: borders stay crisp, not zoomed */
+  --font-stack: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ---- High-contrast theme: switched by <html data-theme="high-contrast"> ---- */
+:root[data-theme="high-contrast"] {
+  --color-bg:           #000000;
+  --color-surface:      #000000;
+  --color-text:         #ffffff;
+  --color-muted:        #ffffff;
+  --color-primary:      #ffd400;   /* yellow on black ~14:1 */
+  --color-on-primary:   #000000;
+  --color-action:       #00e676;
+  --color-on-action:    #000000;
+  --color-border:       #ffffff;
+  --color-focus:        #00e5ff;
+  --color-term-bg:      #1f1f1f;
+  --color-warn-bg:      #000000;
+  --color-warn-border:  #ff5252;
+  --color-warn-text:    #ffffff;
+}
+
+/* Root font size = the user's own browser default (100%) x our zoom factor.
+   Because all sizes below use rem, text, buttons and spacing scale together,
+   and the layout re-wraps instead of overflowing (WCAG 1.4.4 and 1.4.10). */
+html {
+  font-size: calc(100% * var(--zoom));
+}
