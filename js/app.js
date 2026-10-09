@@ -7,6 +7,10 @@
 import * as api from './api.js';
 import * as render from './render.js';
 import { initSettings } from './settings.js';
+import {
+  speak, stopSpeaking, isSpeaking, onSpeechStateChange, speechSupported,
+  startCamera, stopCamera, captureId, cameraSupported, cameraErrorMessage,
+} from './hardware.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -18,16 +22,20 @@ const state = {
   steps: [],        // ordered array from steps.php
   stepIndex: 0,     // array traversal: which element is showing
   loading: false,   // blocks double-taps while a request is running
+  capturedUrl: null, // For camera
 };
 
 /* ---------- Drawing helpers ---------- */
 function setView(view) {
+  stopSpeaking();                        // never keep reading a screen the user has left
   state.view = view;
   render.showView(view);
   render.updateNav(view, state.stepIndex, state.steps.length);
+  if (view !== 'magnifier') releaseMagnifier();   // leaving the magnifier: camera OFF, photo erased
 }
 
 function showStep({ announceStep = true } = {}) {
+  stopSpeaking();
   const total = state.steps.length;
   const step = state.steps[state.stepIndex];
   render.renderStep(step, state.stepIndex, total);
@@ -108,8 +116,61 @@ function goBack() {
   showStep();
 }
 
+function toggleListen() {
+  if (state.view !== 'guide') return;
+  if (isSpeaking()) { stopSpeaking(); return; }     // a second tap = stop
+  const step = state.steps[state.stepIndex];
+  speak(`Step ${state.stepIndex + 1} of ${state.steps.length}. ${step.instruction_text}`);
+}
+
+/* ---------- ID magnifier ---------- */
+function releaseMagnifier() {
+  stopCamera();
+  if (state.capturedUrl) {
+    URL.revokeObjectURL(state.capturedUrl);     // frees the photo from memory
+    state.capturedUrl = null;
+  }
+}
+
+async function startMagnifier() {
+  releaseMagnifier();
+  render.showCameraLive();
+  if (!cameraSupported) {
+    render.showCameraError('The camera needs a secure connection (https or localhost) and a supported browser.');
+    return;
+  }
+  render.setCameraStatus('Starting camera. If asked, tap Allow.');
+  try {
+    const live = await startCamera($('camera-video'));
+    if (live) render.setCameraStatus('Camera ready.');
+  } catch (error) {
+    render.showCameraError(cameraErrorMessage(error));
+  }
+}
+
 function openMagnifier() {
-  setView('magnifier');                  // camera logic arrives in Stage 3c
+  setView('magnifier');
+  startMagnifier();
+}
+
+let capturing = false;                          // blocks double-taps while the frame is saved
+async function takePicture() {
+  if (state.view !== 'magnifier' || capturing || state.capturedUrl) return;
+  capturing = true;
+  try {
+    state.capturedUrl = await captureId($('camera-video'));
+    stopCamera();                               // the picture is taken: switch the camera off
+    render.showCaptured(state.capturedUrl);
+    render.announce('Picture taken. Your ID card is shown enlarged.');
+  } catch (error) {
+    render.setCameraStatus(error.message);
+  } finally {
+    capturing = false;
+  }
+}
+
+function retake() {
+  if (state.view === 'magnifier') startMagnifier();
 }
 
 /* ---------- Event wiring ---------- */
@@ -119,6 +180,10 @@ function bindEvents() {
   $('service-list').addEventListener('click', (event) => {
     const card = event.target.closest('[data-slug]');
     if (card) openGuide(card.dataset.slug);
+
+  $('btn-listen').addEventListener('click', toggleListen);
+  $('btn-capture').addEventListener('click', takePicture);
+  $('btn-retake').addEventListener('click', retake);
   });
 
   // The Retry button is created dynamically, so delegate from its stable parent.
@@ -132,9 +197,13 @@ function bindEvents() {
   $('btn-open-magnifier').addEventListener('click', openMagnifier);
 }
 
+
+
 /* ---------- Start ---------- */
 // Module scripts are deferred: the HTML is fully parsed before this runs,
 // so no DOMContentLoaded listener is needed.
 initSettings();
 bindEvents();
+onSpeechStateChange(render.setListenState);
+if (!speechSupported) render.hideListenButton();
 loadServices();

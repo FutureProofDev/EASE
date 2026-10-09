@@ -24,9 +24,14 @@ const els = {
   stepText: $('step-text'),
   figure: $('step-figure'), source: $('step-source'), image: $('step-image'),
   action: $('step-action'),
+  btnListen: $('btn-listen'),
   definitionPanel: $('definition-panel'),
   tariffSection: $('tariff-section'), tariffBody: $('tariff-body'),
   announcer: $('announcer'),
+  videoFrame: $('video-frame'), cameraVideo: $('camera-video'),
+  captured: $('captured-image'), cameraStatus: $('camera-status'),
+  btnCapture: $('btn-capture'), btnRetake: $('btn-retake'),
+  magnifierHelp: $('magnifier-help'),
 };
 
 const IMAGE_DIR = 'assets/images/';
@@ -195,4 +200,62 @@ export function renderTariffs(rows) {
     fragment.append(tr);
   }
   els.tariffBody.replaceChildren(fragment);
+}
+
+
+/* ---------- Listen button ---------- */
+export function setListenState(isSpeaking) {
+  const icon = document.createElement('span');
+  icon.setAttribute('aria-hidden', 'true');
+  icon.textContent = isSpeaking ? '⏹' : '🔊';
+  // The label itself changes, so screen readers hear what a tap will do.
+  els.btnListen.replaceChildren(icon, isSpeaking ? ' Stop listening' : ' Listen to this step');
+}
+
+export function hideListenButton() {
+  els.btnListen.hidden = true;           // speech unsupported: no dead button
+}
+
+/* ---------- ID magnifier ---------- */
+function setRetakeLabel(text) {
+  els.btnRetake.replaceChildren(text);
+}
+
+export function setCameraStatus(message) {
+  els.cameraStatus.textContent = message;     // role="status" makes screen readers read it
+}
+
+// State 1: live camera, ready to capture.
+export function showCameraLive() {
+  els.captured.hidden = true;
+  els.captured.removeAttribute('src');
+  els.videoFrame.hidden = false;
+  els.btnCapture.hidden = false;
+  els.btnRetake.hidden = true;
+  els.magnifierHelp.hidden = false;
+  setCameraStatus('');
+}
+
+// State 2: picture taken, shown enlarged at the top.
+export function showCaptured(url) {
+  els.videoFrame.hidden = true;
+  els.captured.src = url;
+  els.captured.hidden = false;
+  els.btnCapture.hidden = true;
+  els.magnifierHelp.hidden = true;
+  setRetakeLabel('Take another picture');
+  els.btnRetake.hidden = false;
+  setCameraStatus('Pinch the picture with two fingers to zoom in even more.');
+  els.btnRetake.focus();                      // the hidden Take button had focus; move it somewhere real
+}
+
+// State 3: camera failed. Explain and offer a retry.
+export function showCameraError(message) {
+  els.videoFrame.hidden = true;
+  els.captured.hidden = true;
+  els.btnCapture.hidden = true;
+  els.magnifierHelp.hidden = false;
+  setRetakeLabel('Try the camera again');
+  els.btnRetake.hidden = false;
+  setCameraStatus(message);
 }
