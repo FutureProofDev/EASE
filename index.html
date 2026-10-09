@@ -24,23 +24,25 @@
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
 
-  <!-- Strict fallback: this style block exists ONLY when JavaScript is off.
-       It hides the whole app so the user sees just the warning below. -->
-  <noscript><style>#app { display: none !important; }</style></noscript>
+  <!-- JS off: hide the app and jump instantly to the simple version.
+       Only <style>, <link> and <meta> are allowed in a head <noscript>. -->
+  <noscript>
+    <style>#app { display: none !important; }</style>
+    <meta http-equiv="refresh" content="0; url=nojs.html">
+  </noscript>
 
   <!-- type="module": its own scope, deferred by default (does not block parsing). -->
   <script type="module" src="js/app.js"></script>
 </head>
 
 <body>
-  <a class="skip-link" href="#main">Skip to main content</a>
 
-  <!-- Shown ONLY when JavaScript is disabled. Styled in components.css. -->
+    <!-- Safety net if the browser blocks the redirect above. -->
   <noscript>
     <div class="noscript-warning" role="alert">
       <h1>EASE needs JavaScript</h1>
-      <p>This guide cannot work while JavaScript is turned off.</p>
-      <p>Please turn JavaScript on in your browser settings, then reload this page.</p>
+      <p>JavaScript is turned off, so the full guide cannot run.</p>
+      <p><a href="nojs.html">Open the simple version of the guides</a></p>
     </div>
   </noscript>
 

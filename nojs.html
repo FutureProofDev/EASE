@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="standard">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>EASE (simple version)</title>
+  <meta name="description" content="A simple, printable version of the EASE guides for MoMo, NHIS and ECG. No JavaScript needed.">
+
+  <!-- Reuses the app's design tokens, so both pages always look related. -->
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/nojs.css">
+</head>
+
+<body>
+  <div class="nojs-page" id="nojs-top">
+
+    <header class="nojs-header">
+      <h1>EASE: Elder Access and Service Engine</h1>
+    </header>
+
+    <div class="nojs-banner" role="note">
+      <p><strong>You are seeing the simple version.</strong> Voice control, the ID magnifier,
+      text size settings and tap-for-meaning need JavaScript.</p>
+      <p>To use everything, turn JavaScript on in your browser settings, then
+      <a href="index.html">open the full version</a>.</p>
+    </div>
+
+    <nav aria-label="Guides on this page">
+      <h2>Choose a guide</h2>
+      <ul class="nojs-contents" role="list">
+        <li><a href="#nojs-momo">MTN MoMo Registration</a></li>
+        <li><a href="#nojs-nhis">NHIS Renewal by Phone</a></li>
+        <li><a href="#nojs-ecg">Buy ECG Prepaid Credit</a></li>
+        <li><a href="#nojs-costs">Costs to expect</a></li>
+        <li><a href="#nojs-words">What the words mean</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <!-- ===== Guide 1 ===== -->
+      <section id="nojs-momo" aria-labelledby="nojs-momo-h">
+        <h2 id="nojs-momo-h">MTN MoMo Registration</h2>
+        <p class="lead">Open your mobile money wallet so you can send and receive money.</p>
+        <ol class="nojs-steps" role="list">
+          <li>Gather your Ghana Card and the phone with your MTN SIM card. The SIM must be registered in your name.</li>
+          <li>Visit a MoMo Agent or an MTN service centre near you. Look for the yellow MoMo sign.</li>
+          <li>Give the Agent your Ghana Card. The Agent will enter your details and open your wallet.</li>
+          <li>Dial the MoMo short code on your phone to open your wallet menu.
+            <a class="nojs-dial" href="tel:*170%23">Dial *170#</a></li>
+          <li>Follow the prompts to create your secret MoMo PIN. Choose numbers only you will remember. Never share your PIN with anyone.</li>
+          <li>Wait for the confirmation SMS from MTN. Your wallet is now ready to use.</li>
+        </ol>
+        <p><a class="nojs-top" href="#nojs-top">Back to the list of guides</a></p>
+      </section>
+
+      <!-- ===== Guide 2 ===== -->
+      <section id="nojs-nhis" aria-labelledby="nojs-nhis-h">
+        <h2 id="nojs-nhis-h">NHIS Renewal by Phone</h2>
+        <p class="lead">Renew your National Health Insurance membership with a short code.</p>
+        <ol class="nojs-steps" role="list">
+          <li>Find your NHIS membership number. It is printed on your NHIS card.</li>
+          <li>Make sure your MoMo wallet has enough money to pay the premium.</li>
+          <li>Dial the NHIS short code to open the renewal menu.
+            <a class="nojs-dial" href="tel:*929%23">Dial *929#</a></li>
+          <li>Choose the option for renewing your membership, then enter your NHIS membership number when asked.</li>
+          <li>Confirm the amount shown, then enter your MoMo PIN to pay.</li>
+          <li>Wait for the confirmation SMS. Keep it as proof of payment until your card is updated.</li>
+        </ol>
+        <p><a class="nojs-top" href="#nojs-top">Back to the list of guides</a></p>
+      </section>
+
+      <!-- ===== Guide 3 ===== -->
+      <section id="nojs-ecg" aria-labelledby="nojs-ecg-h">
+        <h2 id="nojs-ecg-h">Buy ECG Prepaid Credit</h2>
+        <p class="lead">Top up your electricity meter using your Mobile Money wallet.</p>
+        <ol class="nojs-steps" role="list">
+          <li>Find the meter number on the front of your prepaid electricity meter.</li>
+          <li>Dial the MoMo short code to open your wallet menu.
+            <a class="nojs-dial" href="tel:*170%23">Dial *170#</a></li>
+          <li>Choose the option to pay a bill, then choose ECG prepaid from the list.</li>
+          <li>Enter your meter number carefully, then enter the amount you want to buy.</li>
+          <li>Enter your MoMo PIN to confirm payment.</li>
+          <li>You will receive an SMS with a token, which is a long number. Type this token into your meter keypad and press the enter key.</li>
+        </ol>
+        <p><a class="nojs-top" href="#nojs-top">Back to the list of guides</a></p>
+      </section>
+
+      <!-- ===== Costs ===== -->
+      <section id="nojs-costs" aria-labelledby="nojs-costs-h">
+        <h2 id="nojs-costs-h">Costs to expect</h2>
+        <table class="tariff-table">
+          <caption>Amounts in Ghana cedis (GH₵). These are examples; check with your provider.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Guide</th>
+              <th scope="col">Item</th>
+              <th scope="col">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>MoMo</td><td>Wallet registration</td><td>GH₵ 0.00</td></tr>
+            <tr><td>MoMo</td><td>Cash deposit at agent</td><td>GH₵ 0.00</td></tr>
+            <tr><td>NHIS</td><td>Renewal premium (example)</td><td>GH₵ 30.00</td></tr>
+            <tr><td>ECG</td><td>Minimum top-up (example)</td><td>GH₵ 5.00</td></tr>
+            <tr><td>ECG</td><td>Typical top-up (example)</td><td>GH₵ 50.00</td></tr>
+          </tbody>
+        </table>
+        <p><a class="nojs-top" href="#nojs-top">Back to the list of guides</a></p>
+      </section>
+
+      <!-- ===== Glossary (replaces tap-for-meaning) ===== -->
+      <section id="nojs-words" aria-labelledby="nojs-words-h">
+        <h2 id="nojs-words-h">What the words mean</h2>
+        <dl class="nojs-glossary">
+          <dt>Agent</dt><dd>A trained person, usually at a small shop or kiosk, who helps you deposit, withdraw or register.</dd>
+          <dt>Dial</dt><dd>To type a number into your phone and press the green call button.</dd>
+          <dt>ECG</dt><dd>The Electricity Company of Ghana, which supplies power to homes.</dd>
+          <dt>Ghana Card</dt><dd>The national identity card issued by the National Identification Authority.</dd>
+          <dt>Membership number</dt><dd>The number on your NHIS card that identifies you in the system.</dd>
+          <dt>Meter number</dt><dd>The number printed on your electricity meter that identifies it. ECG needs it to send credit to the right meter.</dd>
+          <dt>MoMo</dt><dd>Short for Mobile Money. It is like a bank account that lives on your phone.</dd>
+          <dt>NHIS</dt><dd>The National Health Insurance Scheme. It helps you pay for hospital care.</dd>
+          <dt>PIN</dt><dd>A secret number you choose to protect your money. Never tell it to anyone.</dd>
+          <dt>Premium</dt><dd>The amount of money you pay to keep your insurance active.</dd>
+          <dt>Prepaid</dt><dd>You pay first, then use. For electricity, you buy credit before you use the power.</dd>
+          <dt>Short code</dt><dd>A short number starting with a star and ending with a hash, like *170#. You dial it like a phone number to open a menu.</dd>
+          <dt>SMS</dt><dd>A text message sent to your phone.</dd>
+          <dt>Token</dt><dd>A long number sent by SMS. You type it into your electricity meter to load credit.</dd>
+          <dt>USSD</dt><dd>The technology behind short codes. It shows you a menu on your phone screen without needing internet.</dd>
+          <dt>Wallet</dt><dd>The place on your phone where your Mobile Money is kept.</dd>
+        </dl>
+        <p><a class="nojs-top" href="#nojs-top">Back to the list of guides</a></p>
+      </section>
+    </main>
+
+    <footer class="nojs-footer">
+      <p>Menus, short codes and prices can change. If something looks different on your phone, check with your provider.</p>
+      <p>EASE: a student project for older users in Ghana.</p>
+    </footer>
+
+  </div>
+</body>
+</html>
