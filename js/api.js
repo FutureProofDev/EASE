@@ -37,14 +37,6 @@ async function request(path, options) {
   return body.data;
 }
 
-export const getServices   = ()     => request('services.php');
-export const getGuide      = (slug) => request(`steps.php?service=${encodeURIComponent(slug)}`);
-export const getTariffs    = (slug) => request(`tariffs.php?service=${encodeURIComponent(slug)}`);
-export const getDictionary = ()     => request('dictionary.php');
-
-export const defineTerm = (term) =>
-  request('define.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ term }),
-  });
+export const getServices = ()     => request('services.php');
+export const getGuide    = (slug) => request(`steps.php?service=${encodeURIComponent(slug)}`);
+export const getTariffs  = (slug) => request(`tariffs.php?service=${encodeURIComponent(slug)}`);

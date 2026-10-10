@@ -43,8 +43,8 @@ export function isSpeaking() { return speaking; }
 let lastSpokeAt = 0;                    // when the app's own voice last finished
 
 function setSpeaking(value) {
+  if (speaking && !value) lastSpokeAt = Date.now();   // only when speech actually ENDS
   speaking = value;
-  if (!value) lastSpokeAt = Date.now();
   onChange(value);
 }
 

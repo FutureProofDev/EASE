@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="css/theme.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 
   <!-- JS off: hide the app and jump instantly to the simple version.
        Only <style>, <link> and <meta> are allowed in a head <noscript>. -->
@@ -80,8 +81,12 @@
         <ul id="service-list" class="card-list" role="list"></ul>
 
         <h2 id="tools-heading" class="section-gap">Magnify your ID Card</h2>
-        <button id="btn-open-magnifier" type="button" class="btn btn-primary btn-block">
+        <button id="btn-open-magnifier" type="button" class="service-card tool-card">
           <span class="card-icon" data-icon="search" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-title">Open the magnifier</span>
+            <span class="card-summary">Can't read the small print on your Ghana Card or NHIS card? Use the camera to enlarge it.</span>
+          </span>
         </button>
 
         <details class="voice-help section-gap">
@@ -130,18 +135,6 @@
             </button>
             <!-- Native protocol link, e.g. tel:*929%23. JS sets href and label. -->
             <a id="step-action" class="btn btn-action" href="#" hidden></a>
-          </div>
-
-          <!-- Dictionary answer appears here after tapping a highlighted word. -->
-          <div id="definition-panel" class="definition-panel" role="region" aria-label="Word meaning" hidden>
-            <p class="definition-term" id="definition-term"></p>
-            <p id="definition-text"></p>
-            <div class="button-row">
-              <button id="btn-read-definition" type="button" class="btn btn-secondary">
-                <span aria-hidden="true">🔊</span> Listen
-              </button>
-              <button id="btn-close-definition" type="button" class="btn btn-secondary">Close</button>
-            </div>
           </div>
         </article>
 
@@ -204,8 +197,9 @@
     </nav>
 
     <footer class="app-footer">
-      <p>Menus, short codes and prices can change. If something looks different on your phone, check with your provider.</p>
       <p>EASE: a student project for older users in Ghana.</p>
+      <p>Short codes, menus and prices change from time to time. If your screen looks different from a guide, trust your screen and check with your provider.</p>
+      
     </footer>
 
     <!-- Invisible live region: JS writes "Step 3 of 6" here so screen readers announce changes. -->

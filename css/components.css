@@ -146,8 +146,6 @@
 .step-figure img { display: block; width: 100%; height: auto; border-radius: 1rem; }
 .step-actions { display: grid; gap: var(--space-1); margin-top: var(--space-2); }
 
-.definition-panel { margin-top: var(--space-3); padding: var(--space-2); background: var(--color-term-bg); border: var(--border) solid var(--color-primary); border-radius: var(--radius); }
-.definition-term { font-size: 1.4rem; font-weight: 700; margin-bottom: var(--space-1); }
 
 /* ---------- Tariff table ---------- */
 .tariff-section { margin-top: var(--space-4); }

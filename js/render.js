@@ -25,7 +25,6 @@ const els = {
   figure: $('step-figure'), source: $('step-source'), image: $('step-image'),
   action: $('step-action'),
   btnListen: $('btn-listen'),
-  definitionPanel: $('definition-panel'),
   tariffSection: $('tariff-section'), tariffBody: $('tariff-body'),
   announcer: $('announcer'),
   videoFrame: $('video-frame'), cameraVideo: $('camera-video'),
@@ -149,7 +148,6 @@ export function renderStep(step, index, total) {
   els.progress.max = total;
   els.progress.value = index + 1;
   els.stepText.textContent = step.instruction_text;
-  els.definitionPanel.hidden = true;           // an old word meaning must not linger
 
   renderImage(step);
   renderAction(step);

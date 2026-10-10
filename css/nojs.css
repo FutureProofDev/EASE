@@ -82,11 +82,6 @@
   border-radius: var(--radius);
 }
 
-/* ---------- Glossary ---------- */
-.nojs-glossary { margin: 0; }
-.nojs-glossary dt { margin-top: var(--space-2); font-weight: 700; font-size: 1.3rem; color: var(--color-primary); }
-.nojs-glossary dd { margin: 0.25rem 0 0; padding-bottom: var(--space-2); border-bottom: 2px solid var(--color-border); }
-
 .nojs-footer { font-size: 1rem; color: var(--color-muted); text-align: center; }
 
 /* ---------- Printing: handy for seniors who want a paper copy ---------- */
