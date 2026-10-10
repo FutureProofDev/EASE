@@ -1,6 +1,6 @@
 /* =====================================================================
    components.css: reusable pieces. Colours come from theme.css variables,
-   so every component re-themes automatically.
+   so every component re-themes automatically (including high contrast).
    ===================================================================== */
 
 /* ---------- Accessibility utilities ---------- */
@@ -8,12 +8,8 @@
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
-
 /* Visible keyboard focus on EVERY interactive element (WCAG 2.4.7). */
-:focus-visible {
-  outline: 4px solid var(--color-focus);
-  outline-offset: 3px;
-}
+:focus-visible { outline: 4px solid var(--color-focus); outline-offset: 3px; }
 
 /* ---------- Buttons ("fat finger" rule: >= 60px at zoom 1) ---------- */
 .btn {
@@ -27,7 +23,8 @@
   cursor: pointer;
   transition: transform 0.1s ease;
 }
-.btn:active { transform: scale(0.97); }          /* tactile press feedback */
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 .btn-primary   { background: var(--color-primary); color: var(--color-on-primary); }
 .btn-secondary { background: var(--color-surface); color: var(--color-primary); }
 .btn-action    { background: var(--color-action); color: var(--color-on-action); border-color: var(--color-action); }
@@ -36,41 +33,94 @@
 
 .button-row { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2); }
 .button-row .btn { flex: 1 1 12rem; }
+#home-status .btn { margin-top: var(--space-1); }
 
-/* ---------- Service cards (Home) ---------- */
+/* ---------- Home: hero, reassurance chips, notice ---------- */
+.hero {
+  margin-bottom: var(--space-3); padding: var(--space-3) var(--space-2);
+  background: var(--color-soft);
+  border-left: 8px solid var(--color-accent);
+  border-radius: var(--radius);
+}
+.hero h2 { font-size: 2rem; }
+.hero .lead { color: var(--color-text); }
+.chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.chips li {
+  padding: 0.25rem 1rem; font-size: 1.05rem; font-weight: 700;
+  background: var(--color-surface); border: 2px solid var(--color-border); border-radius: 999px;
+}
+
+.notice {
+  display: flex; gap: var(--space-2); align-items: flex-start;
+  margin-bottom: var(--space-3); padding: var(--space-2);
+  background: var(--color-warn-bg); color: var(--color-warn-text);
+  border: var(--border) solid var(--color-warn-border); border-radius: var(--radius);
+}
+.notice-icon {
+  flex: none; display: grid; place-items: center; width: 2.5rem; height: 2.5rem;
+  font-weight: 700; font-size: 1.5rem; font-family: var(--font-stack);
+  color: #fff; background: var(--color-warn-border); border-radius: 50%;
+}
+:root[data-theme="high-contrast"] .notice-icon { color: #000; background: var(--color-warn-border); }
+.notice h3 { margin-bottom: 0.25rem; font-size: 1.25rem; }
+.notice p { margin: 0; }
+
+/* ---------- Cards (guides and tools) ---------- */
 .card-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
 .service-card {
-  display: block; width: 100%; text-align: left;
-  min-height: var(--tap);
-  padding: var(--space-2) var(--space-3);
+  display: flex; align-items: flex-start; gap: var(--space-2);
+  width: 100%; text-align: left; min-height: var(--tap);
+  padding: var(--space-2);
   font: inherit; color: var(--color-text);
   background: var(--color-surface);
-  border: var(--border) solid var(--color-primary);
+  border: var(--border) solid var(--color-border);
+  border-top: 8px solid var(--color-primary);
   border-radius: var(--radius);
   cursor: pointer;
 }
-.service-card h3 { margin: 0 0 0.25rem; color: var(--color-primary); }
-.service-card p  { margin: 0; color: var(--color-muted); }
-.service-card .badge {
-  display: inline-block; margin-top: var(--space-1); padding: 0.1rem 0.75rem;
-  font-size: 1rem; font-weight: 700;
-  border: 2px solid var(--color-border); border-radius: 999px;
+.service-card:active { background: var(--color-soft); }
+.card-icon {
+  flex: none; display: grid; place-items: center;
+  width: 3.5rem; height: 3.5rem; font-size: 1.8rem;
+  background: var(--color-soft); border-radius: 50%;
+}
+.card-body { display: block; min-width: 0; }
+.card-eyebrow { display: block; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--color-muted); }
+.card-title { display: block; margin: 0.1rem 0 0.25rem; font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; line-height: 1.25; color: var(--color-primary); }
+.card-summary { display: block; color: var(--color-muted); }
+.card-cta { display: block; margin-top: var(--space-1); font-weight: 700; color: var(--color-action); }
+.card-cta::after { content: " \2192"; }
+:root[data-theme="high-contrast"] .service-card { border-top-color: var(--color-accent); }
+.tool-card { border-top-color: var(--color-action); }
+
+/* ---------- How it works ---------- */
+.how-list { list-style: none; margin: 0; padding: 0; counter-reset: how; display: grid; gap: var(--space-2); }
+.how-list li { counter-increment: how; position: relative; padding-left: 3.25rem; }
+.how-list li::before {
+  content: counter(how); position: absolute; left: 0; top: 0;
+  display: grid; place-items: center; width: 2.25rem; height: 2.25rem;
+  font-weight: 700; color: var(--color-on-accent); background: var(--color-accent); border-radius: 50%;
 }
 
 /* ---------- Voice help (<details>) ---------- */
-.voice-help { border: var(--border) solid var(--color-border); border-radius: var(--radius); padding: 0 var(--space-2); }
+.voice-help { background: var(--color-surface); border: var(--border) solid var(--color-border); border-radius: var(--radius); padding: 0 var(--space-2); }
 .voice-help summary { min-height: var(--tap); display: flex; align-items: center; font-weight: 700; cursor: pointer; }
 .voice-help ul { margin: 0 0 var(--space-2); padding-left: 1.5rem; }
 
 /* ---------- Guide: progress and step card ---------- */
-.step-counter { font-size: 1.4rem; font-weight: 700; margin-bottom: var(--space-1); }
-#step-progress { width: 100%; height: 1.25rem; accent-color: var(--color-primary); }
+.step-counter {
+  display: inline-block; margin-bottom: var(--space-1); padding: 0.1rem 1rem;
+  font-size: 1.3rem; font-weight: 700;
+  color: var(--color-on-accent); background: var(--color-accent); border-radius: 999px;
+}
+#step-progress { display: block; width: 100%; height: 1.25rem; accent-color: var(--color-primary); }
 .progress-block { margin-bottom: var(--space-3); }
 
 .step-card {
   padding: var(--space-3) var(--space-2);
   background: var(--color-surface);
   border: var(--border) solid var(--color-border);
+  border-left: 10px solid var(--color-accent);
   border-radius: var(--radius);
 }
 .step-text { font-size: 1.5rem; line-height: 1.6; }
@@ -78,33 +128,20 @@
 .step-figure img { display: block; width: 100%; height: auto; border-radius: var(--radius); }
 .step-actions { display: grid; gap: var(--space-1); margin-top: var(--space-2); }
 
-/* Dictionary words: look tappable without relying on colour alone (dotted underline + bold). */
-.term {
-  font: inherit; font-weight: 700; color: var(--color-primary);
-  background: var(--color-term-bg);
-  border: 0; border-bottom: 3px dotted currentColor; border-radius: 0.25rem;
-  padding: 0 0.2em; margin: 0; cursor: pointer;
-}
-
-.definition-panel {
-  margin-top: var(--space-3); padding: var(--space-2);
-  background: var(--color-term-bg);
-  border: var(--border) solid var(--color-primary);
-  border-radius: var(--radius);
-}
+.definition-panel { margin-top: var(--space-3); padding: var(--space-2); background: var(--color-term-bg); border: var(--border) solid var(--color-primary); border-radius: var(--radius); }
 .definition-term { font-size: 1.4rem; font-weight: 700; margin-bottom: var(--space-1); }
 
 /* ---------- Tariff table ---------- */
 .tariff-section { margin-top: var(--space-4); }
-.tariff-table { width: 100%; border-collapse: collapse; font-size: 1.1rem; }
+.tariff-table { width: 100%; border-collapse: collapse; font-size: 1.1rem; background: var(--color-surface); }
 .tariff-table caption { text-align: left; font-weight: 700; padding-bottom: var(--space-1); }
 .tariff-table th, .tariff-table td {
   padding: 0.75rem; text-align: left; vertical-align: top;
   border: 2px solid var(--color-border);
-  overflow-wrap: anywhere;       /* long words wrap instead of forcing sideways scroll */
+  overflow-wrap: anywhere;
 }
 .tariff-table thead th { background: var(--color-primary); color: var(--color-on-primary); }
-.tariff-table tbody tr:nth-child(even) { background: var(--color-term-bg); }
+.tariff-table tbody tr:nth-child(even) { background: var(--color-soft); }
 
 /* ---------- ID magnifier ---------- */
 .magnifier-stage { margin-bottom: var(--space-2); }
@@ -115,16 +152,8 @@
 }
 .video-frame video { width: 100%; height: 100%; object-fit: cover; display: block; }
 /* Centre 50% x 50% = exactly the region hardware.js crops for the 2x zoom. */
-.guide-box {
-  position: absolute; inset: 25%;
-  border: 4px dashed #fff;
-  outline: 2px solid #000;       /* black edge keeps the white box visible on bright scenes */
-  pointer-events: none;
-}
-.captured-image {
-  display: block; width: 100%; height: auto;
-  border: var(--border) solid var(--color-primary); border-radius: var(--radius);
-}
+.guide-box { position: absolute; inset: 25%; border: 4px dashed #fff; outline: 2px solid #000; pointer-events: none; }
+.captured-image { display: block; width: 100%; height: auto; border: var(--border) solid var(--color-primary); border-radius: var(--radius); }
 
 /* ---------- Settings dialog ---------- */
 dialog {
@@ -133,10 +162,10 @@ dialog {
   color: var(--color-text); background: var(--color-surface);
   border: 4px solid var(--color-primary); border-radius: var(--radius);
 }
-dialog::backdrop { background: rgb(0 0 0 / 0.75); }
+dialog::backdrop { background: rgb(42 26 18 / 0.75); }
 
 .choice-group { border: 0; margin: 0 0 var(--space-3); padding: 0; display: grid; gap: var(--space-1); }
-.choice-group legend { font-size: 1.4rem; font-weight: 700; margin-bottom: var(--space-1); padding: 0; }
+.choice-group legend { font-family: var(--font-heading); font-size: 1.4rem; font-weight: 700; margin-bottom: var(--space-1); padding: 0; }
 .choice {
   display: flex; align-items: center; gap: 0.75rem;
   min-height: var(--tap); padding: 0.5rem 0.75rem;
@@ -144,7 +173,7 @@ dialog::backdrop { background: rgb(0 0 0 / 0.75); }
   cursor: pointer;
 }
 .choice input { width: 1.75rem; height: 1.75rem; flex: none; accent-color: var(--color-primary); }
-.choice:has(input:checked) { border-color: var(--color-primary); background: var(--color-term-bg); font-weight: 700; }
+.choice:has(input:checked) { border-color: var(--color-primary); background: var(--color-soft); font-weight: 700; }
 
 /* ---------- JavaScript-disabled warning (safety net before the redirect) ---------- */
 .noscript-warning {
@@ -161,15 +190,3 @@ dialog::backdrop { background: rgb(0 0 0 / 0.75); }
   *, *::before, *::after { transition: none !important; animation: none !important; }
   .btn:active { transform: none; }
 }
-
-/* ---------- Added in Stage 3a ---------- */
-/* Service card contents are <span>s, because a <button> may only contain
-   "phrasing content" in HTML (no <h3> or <p> inside it). */
-.service-card .card-title   { display: block; font-size: 1.5rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.25rem; }
-.service-card .card-summary { display: block; color: var(--color-muted); }
-
-/* Disabled buttons (e.g. Back on step 1) must look disabled. */
-.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
-
-/* "Try again" button inside the Home status message. */
-#home-status .btn { margin-top: var(--space-1); }

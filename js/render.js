@@ -32,6 +32,8 @@ const els = {
   captured: $('captured-image'), cameraStatus: $('camera-status'),
   btnCapture: $('btn-capture'), btnRetake: $('btn-retake'),
   magnifierHelp: $('magnifier-help'),
+  btnMic: $('btn-mic'), micStatus: $('mic-status'),
+  voiceHelp: document.querySelector('.voice-help'),
 };
 
 const IMAGE_DIR = 'assets/images/';
@@ -104,6 +106,8 @@ function span(className, text) {
   return node;
 }
 
+const CATEGORY_ICONS = { 'Mobile Money': '📱', Health: '🏥', Utilities: '💡' };
+
 export function renderServices(services) {
   const fragment = document.createDocumentFragment();
   for (const service of services) {
@@ -111,17 +115,25 @@ export function renderServices(services) {
     const card = document.createElement('button');
     card.type = 'button';
     card.className = 'service-card';
-    card.dataset.slug = service.slug;     // app.js reads this to know which guide to open
+    card.dataset.slug = service.slug;
+
+    const icon = span('card-icon', CATEGORY_ICONS[service.category] || '📋');
+    icon.setAttribute('aria-hidden', 'true');
+
     const count = Number(service.step_count);
-    card.append(
+    const body = span('card-body', '');
+    body.append(
+      span('card-eyebrow', service.category),
       span('card-title', service.title),
       span('card-summary', service.summary),
-      span('badge', `${count} ${count === 1 ? 'step' : 'steps'}`)
+      span('card-cta', `Show me how, ${count} ${count === 1 ? 'step' : 'steps'}`)
     );
+
+    card.append(icon, body);
     item.append(card);
     fragment.append(item);
   }
-  els.serviceList.replaceChildren(fragment);   // single insertion
+  els.serviceList.replaceChildren(fragment);
 }
 
 /* ---------- Guide ---------- */
@@ -258,4 +270,17 @@ export function showCameraError(message) {
   setRetakeLabel('Try the camera again');
   els.btnRetake.hidden = false;
   setCameraStatus(message);
+}
+
+
+/* ---------- Voice control ---------- */
+export function setMicState(isOn, message = '') {
+  // aria-pressed tells screen readers on/off; the CSS already fills the button when "true".
+  els.btnMic.setAttribute('aria-pressed', String(isOn));
+  els.micStatus.textContent = message;   // role="status" reads it aloud
+}
+
+export function hideMicButton() {
+  els.btnMic.hidden = true;              // browser has no speech recognition: no dead button
+  els.voiceHelp.hidden = true;
 }

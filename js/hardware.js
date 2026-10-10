@@ -182,3 +182,89 @@ export function captureId(video) {
     );
   });
 }
+
+
+
+
+/* =====================================================================
+   Part 3: voice commands (SpeechRecognition).
+   This file only LISTENS and reports words. app.js decides what the
+   words mean, and render.js draws the status.
+   ===================================================================== */
+
+// Chrome and Edge expose it under a "webkit" prefix.
+const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+export const voiceSupported = Boolean(Recognition);
+
+let recognition = null;
+let wantListening = false;      // what the USER asked for (the mic button state)
+let handlers = { onHeard: () => {}, onState: () => {} };
+
+export function setVoiceHandlers(newHandlers) { handlers = newHandlers; }
+export function isVoiceOn() { return wantListening; }
+
+function voiceErrorMessage(code) {
+  switch (code) {
+    case 'not-allowed':
+    case 'service-not-allowed':
+      return 'The microphone is blocked. Allow the microphone in your browser settings, then try again.';
+    case 'audio-capture':
+      return 'No microphone was found on this device.';
+    case 'network':
+      return 'Voice control needs an internet connection.';
+    default:
+      return 'Voice control stopped. Please try again.';
+  }
+}
+
+export function startVoice() {
+  if (!voiceSupported || wantListening) return;
+  wantListening = true;
+
+  recognition = new Recognition();
+  recognition.lang = 'en-GH';          // Ghanaian English; the browser falls back if unsupported
+  recognition.continuous = true;       // keep listening for several commands
+  recognition.interimResults = false;  // only final results, no half-finished guesses
+  recognition.maxAlternatives = 3;     // the engine's top 3 guesses for each phrase
+
+  recognition.onstart = () => handlers.onState(true, '');
+
+  recognition.onresult = (event) => {
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const result = event.results[i];
+      if (!result.isFinal) continue;
+      // Pass ALL guesses on: if guess 1 is "necks" but guess 2 is "next", we still catch it.
+      handlers.onHeard(Array.from(result).map((guess) => guess.transcript));
+    }
+  };
+
+  recognition.onerror = (event) => {
+    // Silence and manual stops are normal; ignore them.
+    if (event.error === 'no-speech' || event.error === 'aborted') return;
+    wantListening = false;
+    handlers.onState(false, voiceErrorMessage(event.error));
+  };
+
+  // Browsers end a session by themselves after a pause. While the user
+  // still wants voice control, quietly start a new session.
+  recognition.onend = () => {
+    if (!wantListening) return;
+    setTimeout(() => {
+      if (!wantListening) return;
+      try { recognition.start(); } catch { /* already starting: ignore */ }
+    }, 300);
+  };
+
+  try {
+    recognition.start();               // the first start shows the permission prompt
+  } catch {
+    wantListening = false;
+    handlers.onState(false, voiceErrorMessage('other'));
+  }
+}
+
+export function stopVoice() {
+  wantListening = false;
+  if (recognition) recognition.abort();
+  handlers.onState(false, '');
+}

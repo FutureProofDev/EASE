@@ -6,10 +6,11 @@
    ===================================================================== */
 import * as api from './api.js';
 import * as render from './render.js';
-import { initSettings } from './settings.js';
+import { initSettings, changeZoom } from './settings.js';
 import {
   speak, stopSpeaking, isSpeaking, onSpeechStateChange, speechSupported,
   startCamera, stopCamera, captureId, cameraSupported, cameraErrorMessage,
+  voiceSupported, startVoice, stopVoice, isVoiceOn, setVoiceHandlers,
 } from './hardware.js';
 
 const $ = (id) => document.getElementById(id);
@@ -173,17 +174,57 @@ function retake() {
   if (state.view === 'magnifier') startMagnifier();
 }
 
+
+/* ---------- Voice control ---------- */
+// Data-driven: each command is a list of phrases plus the SAME action a button calls.
+// To add a command later, add one line here.
+const COMMANDS = [
+  { say: ['zoom in', 'bigger'],                              run: () => changeZoom(1) },
+  { say: ['zoom out', 'smaller'],                            run: () => changeZoom(-1) },
+  { say: ['take picture', 'take a picture', 'take photo'],   run: takePicture },
+  { say: ['next'],                                           run: goNext },
+  { say: ['back', 'previous'],                               run: goBack },
+  { say: ['home'],                                           run: goHome },
+  { say: ['read', 'listen'],                                 run: toggleListen },
+];
+
+function findCommand(guesses) {
+  for (const guess of guesses) {
+    // Lowercase, strip punctuation, pad with spaces. Padding means "next" matches
+    // "go next please" but "read" does not match "already".
+    const text = ` ${guess.toLowerCase().replace(/[^a-z ]/g, ' ')} `;
+    for (const command of COMMANDS) {
+      if (command.say.some((phrase) => text.includes(` ${phrase} `))) return command;
+    }
+  }
+  return null;
+}
+
+function handleHeard(guesses) {
+  // The app's own voice says words like "next" and "number": never obey it.
+  if (isSpeaking()) return;
+  const heard = guesses[0].trim();
+  const command = findCommand(guesses);
+  if (command) {
+    render.setMicState(true, `Heard: "${heard}"`);
+    command.run();
+  } else {
+    render.setMicState(true, `Heard "${heard}". Try: Next, Back, Home, Zoom in, Zoom out or Read.`);
+  }
+}
+
+function toggleVoice() {
+  if (isVoiceOn()) stopVoice();
+  else startVoice();
+}
+
+
 /* ---------- Event wiring ---------- */
 function bindEvents() {
-  // EVENT DELEGATION: one listener on the <ul> serves every card, including
-  // cards created later. closest() finds the card even if a <span> inside it was tapped.
+  // EVENT DELEGATION: one listener on the <ul> serves every card.
   $('service-list').addEventListener('click', (event) => {
     const card = event.target.closest('[data-slug]');
     if (card) openGuide(card.dataset.slug);
-
-  $('btn-listen').addEventListener('click', toggleListen);
-  $('btn-capture').addEventListener('click', takePicture);
-  $('btn-retake').addEventListener('click', retake);
   });
 
   // The Retry button is created dynamically, so delegate from its stable parent.
@@ -195,8 +236,11 @@ function bindEvents() {
   $('btn-back').addEventListener('click', goBack);
   $('btn-home').addEventListener('click', goHome);
   $('btn-open-magnifier').addEventListener('click', openMagnifier);
+  $('btn-listen').addEventListener('click', toggleListen);
+  $('btn-capture').addEventListener('click', takePicture);
+  $('btn-retake').addEventListener('click', retake);
+  $('btn-mic').addEventListener('click', toggleVoice);
 }
-
 
 
 /* ---------- Start ---------- */
@@ -206,4 +250,10 @@ initSettings();
 bindEvents();
 onSpeechStateChange(render.setListenState);
 if (!speechSupported) render.hideListenButton();
+setVoiceHandlers({
+  onHeard: handleHeard,
+  onState: (on, errorText) =>
+    render.setMicState(on, errorText || (on ? 'Listening. Say Next, Back, Home, Zoom in, Zoom out or Read.' : '')),
+});
+if (!voiceSupported) render.hideMicButton();
 loadServices();
