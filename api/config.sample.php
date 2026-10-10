@@ -9,9 +9,4 @@ return [
         'pass'    => '',
         'charset' => 'utf8mb4',
     ],
-    // Get a key from Google AI Studio. Leave the placeholder to disable Gemini
-    // (define.php then simply falls back to dictionary/cache only).
-    'gemini_api_key' => 'PASTE_YOUR_KEY_HERE',
-    // Model names change over time: check the current name in Google's docs.
-    'gemini_model'   => 'gemini-2.5-flash',
 ];

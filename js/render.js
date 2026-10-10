@@ -77,7 +77,6 @@ export function updateNav(view, stepIndex, total) {
   const last = stepIndex === total - 1;
   const arrow = document.createElement('span');
   arrow.setAttribute('aria-hidden', 'true');           // decoration only
-  arrow.textContent = last ? '✓' : '→';
   els.btnNext.replaceChildren(last ? 'Finish ' : 'Next ', arrow);
 }
 
@@ -181,8 +180,7 @@ function renderAction(step) {
   if (step.action_href && SAFE_TEL.test(step.action_href)) {
     link.href = step.action_href;              // e.g. tel:*929%23 opens the dialler
     const icon = document.createElement('span');
-    icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = '📞';
+    icon.setAttribute('aria-hidden', 'true'); 
     link.replaceChildren(icon, ` ${step.action_label || 'Call'}`);
     link.hidden = false;
   } else {
