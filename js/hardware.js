@@ -40,11 +40,18 @@ if (speechSupported) {
 export function onSpeechStateChange(callback) { onChange = callback; }
 export function isSpeaking() { return speaking; }
 
+let lastSpokeAt = 0;                    // when the app's own voice last finished
+
 function setSpeaking(value) {
   speaking = value;
+  if (!value) lastSpokeAt = Date.now();
   onChange(value);
 }
 
+/** True while speaking, and for `ms` afterwards (the microphone still hears the echo). */
+export function recentlySpoke(ms) {
+  return speaking || Date.now() - lastSpokeAt < ms;
+}
 export function speak(text) {
   if (!speechSupported || !text) return;
   synth.cancel();                       // never queue: new speech replaces old
@@ -89,6 +96,7 @@ export function stopSpeaking() {
 
 const ZOOM = 2;                 // fixed digital zoom baked into the captured pixels
 let stream = null;              // the live MediaStream, so we can switch the camera OFF
+let activeVideo = null;         // the <video> showing the stream, so we can detach it
 let startToken = 0;             // guards against "user left while permission prompt was open"
 
 // On plain http (not localhost) navigator.mediaDevices is undefined: browsers
@@ -116,6 +124,7 @@ export async function startCamera(video) {
   }
   stream = newStream;
   video.srcObject = stream;
+  activeVideo = video;
   await video.play().catch(() => {});          // autoplay attribute is set too
   return true;
 }
@@ -124,6 +133,7 @@ export async function startCamera(video) {
 export function stopCamera() {
   startToken++;                                // invalidates any start still waiting
   if (stream) {
+    if (activeVideo) { activeVideo.srcObject = null; activeVideo = null; }
     stream.getTracks().forEach((track) => track.stop());
     stream = null;
   }
@@ -196,8 +206,16 @@ export function captureId(video) {
 const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 export const voiceSupported = Boolean(Recognition);
 
+const MAX_FAILURES = 3;        // give up after this many failed restarts in a row
+const MIN_HEALTHY_MS = 1000;   // a session that dies faster than this, having heard nothing, is a failure
+
 let recognition = null;
-let wantListening = false;      // what the USER asked for (the mic button state)
+let wantListening = false;     // what the USER asked for (the mic button state)
+let failures = 0;
+let startedAt = 0;
+let heardWords = false;
+let announcedOn = false;       // so a quiet restart does not overwrite the status line
+let restartTimer = null;
 let handlers = { onHeard: () => {}, onState: () => {} };
 
 export function setVoiceHandlers(newHandlers) { handlers = newHandlers; }
@@ -207,64 +225,97 @@ function voiceErrorMessage(code) {
   switch (code) {
     case 'not-allowed':
     case 'service-not-allowed':
-      return 'The microphone is blocked. Allow the microphone in your browser settings, then try again.';
+      return 'The microphone is blocked. Allow the microphone in your browser settings, then tap Voice control again.';
     case 'audio-capture':
       return 'No microphone was found on this device.';
     case 'network':
-      return 'Voice control needs an internet connection.';
+      return 'Voice control needs the internet and cannot reach it right now. The buttons still work. Tap Voice control to try again.';
     default:
-      return 'Voice control stopped. Please try again.';
+      return 'Voice control stopped. Tap Voice control to try again.';
   }
+}
+
+/** One place that switches voice OFF and tells the UI why. */
+function giveUp(message) {
+  wantListening = false;
+  announcedOn = false;
+  clearTimeout(restartTimer);
+  if (recognition) { try { recognition.abort(); } catch { /* already stopped */ } }
+  handlers.onState(false, message);
+}
+
+function startSession() {
+  if (!wantListening) return;
+  startedAt = Date.now();
+  heardWords = false;
+  try {
+    recognition.start();
+  } catch {
+    // Thrown if the previous session has not fully ended yet. Count it,
+    // never ignore it: this was the silent failure behind "stops after 3 commands".
+    failures += 1;
+    scheduleRestart();
+  }
+}
+
+function scheduleRestart() {
+  if (!wantListening) return;
+  if (failures >= MAX_FAILURES) {
+    giveUp('Voice control disconnected. Tap Voice control to try again.');
+    return;
+  }
+  clearTimeout(restartTimer);
+  restartTimer = setTimeout(startSession, 300 * (failures + 1));   // wait longer after each failure
 }
 
 export function startVoice() {
   if (!voiceSupported || wantListening) return;
+  if (!window.isSecureContext) {
+    handlers.onState(false, 'Voice control needs a secure connection (https).');
+    return;
+  }
   wantListening = true;
+  failures = 0;
+  announcedOn = false;
 
   recognition = new Recognition();
-  recognition.lang = 'en-GH';          // Ghanaian English; the browser falls back if unsupported
-  recognition.continuous = true;       // keep listening for several commands
+  recognition.lang = 'en-GH';          // Ghanaian English
+  recognition.continuous = true;       // set to false if Android keeps dropping out
   recognition.interimResults = false;  // only final results, no half-finished guesses
   recognition.maxAlternatives = 3;     // the engine's top 3 guesses for each phrase
 
-  recognition.onstart = () => handlers.onState(true, '');
+  recognition.onstart = () => {
+    if (announcedOn) return;
+    announcedOn = true;
+    handlers.onState(true, '');
+  };
 
   recognition.onresult = (event) => {
+    heardWords = true;
+    failures = 0;                      // it is clearly working
     for (let i = event.resultIndex; i < event.results.length; i++) {
       const result = event.results[i];
       if (!result.isFinal) continue;
-      // Pass ALL guesses on: if guess 1 is "necks" but guess 2 is "next", we still catch it.
       handlers.onHeard(Array.from(result).map((guess) => guess.transcript));
     }
   };
 
   recognition.onerror = (event) => {
-    // Silence and manual stops are normal; ignore them.
-    if (event.error === 'no-speech' || event.error === 'aborted') return;
-    wantListening = false;
-    handlers.onState(false, voiceErrorMessage(event.error));
+    if (event.error === 'no-speech' || event.error === 'aborted') return;   // normal
+    if (event.error === 'language-not-supported') { recognition.lang = 'en-GB'; return; }
+    giveUp(voiceErrorMessage(event.error));
   };
 
-  // Browsers end a session by themselves after a pause. While the user
-  // still wants voice control, quietly start a new session.
+  // Browsers end sessions by themselves after silence. Restart quietly, but
+  // count a session that died instantly as a failure.
   recognition.onend = () => {
     if (!wantListening) return;
-    setTimeout(() => {
-      if (!wantListening) return;
-      try { recognition.start(); } catch { /* already starting: ignore */ }
-    }, 300);
+    const healthy = heardWords || Date.now() - startedAt >= MIN_HEALTHY_MS;
+    failures = healthy ? 0 : failures + 1;
+    scheduleRestart();
   };
 
-  try {
-    recognition.start();               // the first start shows the permission prompt
-  } catch {
-    wantListening = false;
-    handlers.onState(false, voiceErrorMessage('other'));
-  }
+  startSession();
 }
 
-export function stopVoice() {
-  wantListening = false;
-  if (recognition) recognition.abort();
-  handlers.onState(false, '');
-}
+export function stopVoice() { giveUp(''); }

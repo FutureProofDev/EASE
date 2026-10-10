@@ -11,6 +11,7 @@ import {
   speak, stopSpeaking, isSpeaking, onSpeechStateChange, speechSupported,
   startCamera, stopCamera, captureId, cameraSupported, cameraErrorMessage,
   voiceSupported, startVoice, stopVoice, isVoiceOn, setVoiceHandlers,
+  recentlySpoke,
 } from './hardware.js';
 
 const $ = (id) => document.getElementById(id);
@@ -200,17 +201,31 @@ function findCommand(guesses) {
   return null;
 }
 
+const MAX_COMMAND_WORDS = 3;           // real commands are short; chatter is not
+let lastRun = { name: '', at: 0 };
+const wordCount = (text) => text.trim().split(/\s+/).filter(Boolean).length;
+
 function handleHeard(guesses) {
-  // The app's own voice says words like "next" and "number": never obey it.
-  if (isSpeaking()) return;
-  const heard = guesses[0].trim();
-  const command = findCommand(guesses);
-  if (command) {
-    render.setMicState(true, `Heard: "${heard}"`);
-    command.run();
-  } else {
-    render.setMicState(true, `Heard "${heard}". Try: Next, Back, Home, Zoom in, Zoom out or Read.`);
+  // 1. Never obey the app's own voice, or its echo just after it stops.
+  if (recentlySpoke(1500)) return;
+
+  // 2. Room-chatter filter: "I'll go home next week" is not a command.
+  const short = guesses.filter((g) => wordCount(g) <= MAX_COMMAND_WORDS);
+  if (short.length === 0) return;      // a long sentence: say nothing
+
+  const command = findCommand(short);
+  if (!command) {
+    render.setMicState(true, `Heard "${short[0].trim()}". Try: Next, Back, Home, Zoom in, Zoom out or Read.`);
+    return;
   }
+
+  // 3. Android Chrome sometimes reports one phrase twice: ignore repeats within 1.2 s.
+  const now = Date.now();
+  if (command.say[0] === lastRun.name && now - lastRun.at < 1200) return;
+  lastRun = { name: command.say[0], at: now };
+
+  render.setMicState(true, `Heard: "${short[0].trim()}"`);
+  command.run();
 }
 
 function toggleVoice() {
@@ -243,6 +258,19 @@ function bindEvents() {
 }
 
 
+
+// If the user switches app or locks the phone, switch the mic and camera OFF.
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (isVoiceOn()) stopVoice();
+    stopCamera();
+    stopSpeaking();
+  } else if (state.view === 'magnifier' && !state.capturedUrl) {
+    startMagnifier();                  // they came back: restart the live view
+  }
+});
+
+
 /* ---------- Start ---------- */
 // Module scripts are deferred: the HTML is fully parsed before this runs,
 // so no DOMContentLoaded listener is needed.
@@ -255,5 +283,5 @@ setVoiceHandlers({
   onState: (on, errorText) =>
     render.setMicState(on, errorText || (on ? 'Listening. Say Next, Back, Home, Zoom in, Zoom out or Read.' : '')),
 });
-if (!voiceSupported) render.hideMicButton();
+if (!voiceSupported) render.hideMicButton('Voice control needs Chrome or Edge. Everything else works without it.');
 loadServices();

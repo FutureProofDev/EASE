@@ -1,9 +1,10 @@
 /* =====================================================================
    theme.css: design tokens only (no layout, no components).
    Warm palette: terracotta, gold, warm green, soft peach.
-   Contrast checked against WCAG AA (4.5:1 text, 3:1 borders):
-     text on bg 15.3 | muted on bg 8.4 | white on terracotta 6.5
-     white on green 6.4 | border on bg 5.5 | focus ring on bg 9.5
+   Contrast checked against WCAG AA (4.5:1 text, 3:1 borders and icons):
+     text on bg 15.3 | heading on bg 10.9 | muted on bg 8.4
+     white on terracotta 6.5 | white on green 6.4 | border on surface 5.9
+     terracotta icon on peach tile 5.4 | focus ring on bg 9.5
    Gold (#E3A62B) is DECORATION ONLY: white on gold is just 2.15:1,
    so any text placed on gold must be --color-on-accent (dark brown).
    ===================================================================== */
@@ -17,6 +18,7 @@
   --color-surface:      #FFFBF7;   /* warm white cards */
   --color-soft:         #FDE7D6;   /* peach tint: icon tiles, hero */
   --color-text:         #2A1A12;   /* deep warm brown */
+  --color-heading:      #5E2616;   /* darker terracotta-brown for big headings */
   --color-muted:        #5A4337;
   --color-primary:      #A23E25;   /* terracotta */
   --color-on-primary:   #FFFFFF;
@@ -33,17 +35,16 @@
 
   /* ---- Sizing tokens (rem, so they scale with --zoom) ---- */
   --tap:        3.75rem;   /* 60px "fat finger" minimum touch target at zoom 1 */
-  --radius:     1rem;
+  --radius:     1.25rem;   /* big, friendly corners */
   --space-1:    0.5rem;
   --space-2:    1rem;
   --space-3:    1.5rem;
   --space-4:    2rem;
-  --border:     3px;       /* px on purpose: borders stay crisp, not zoomed */
+  --border:     2px;       /* px on purpose: borders stay crisp, not zoomed */
 
-  /* System fonts only: nothing to download, works offline, fast on cheap phones.
-     Georgia gives headings a warm, readable "printed page" feel. */
+  /* System fonts only: nothing to download, works offline, fast on cheap phones. */
   --font-stack:   system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-heading: Georgia, "Times New Roman", serif;
+  --font-heading: var(--font-stack);
 }
 
 /* ---- High-contrast theme: switched by <html data-theme="high-contrast"> ---- */
@@ -52,6 +53,7 @@
   --color-surface:      #000000;
   --color-soft:         #1A1A1A;
   --color-text:         #ffffff;
+  --color-heading:      #ffffff;
   --color-muted:        #ffffff;
   --color-primary:      #ffd400;
   --color-on-primary:   #000000;

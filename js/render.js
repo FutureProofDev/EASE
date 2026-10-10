@@ -106,7 +106,11 @@ function span(className, text) {
   return node;
 }
 
-const CATEGORY_ICONS = { 'Mobile Money': '📱', Health: '🏥', Utilities: '💡' };
+
+
+// Which line icon each category gets. Unknown categories fall back to "list",
+// so a guide added to the database later still looks right.
+const CATEGORY_ICONS = { 'Mobile Money': 'phone', Health: 'heart', Utilities: 'bolt' };
 
 export function renderServices(services) {
   const fragment = document.createDocumentFragment();
@@ -117,13 +121,13 @@ export function renderServices(services) {
     card.className = 'service-card';
     card.dataset.slug = service.slug;
 
-    const icon = span('card-icon', CATEGORY_ICONS[service.category] || '📋');
+    const icon = span('card-icon', '');
+    icon.dataset.icon = CATEGORY_ICONS[service.category] || 'list';   // CSS draws the icon from this
     icon.setAttribute('aria-hidden', 'true');
 
     const count = Number(service.step_count);
     const body = span('card-body', '');
     body.append(
-      span('card-eyebrow', service.category),
       span('card-title', service.title),
       span('card-summary', service.summary),
       span('card-cta', `Show me how, ${count} ${count === 1 ? 'step' : 'steps'}`)
@@ -135,7 +139,6 @@ export function renderServices(services) {
   }
   els.serviceList.replaceChildren(fragment);
 }
-
 /* ---------- Guide ---------- */
 export function showGuideHeader(service) {
   els.guideTitle.textContent = service.title;
@@ -169,7 +172,7 @@ function renderImage(step) {
   image.sizes = IMAGE_SIZES;
   image.srcset = candidates('jpg');            // fallback format
   image.src = `${base}-960.jpg`;
-  source.srcset = candidates('webp');          // preferred smaller format; browser picks by width
+  source.removeAttribute('srcset');
   figure.hidden = false;
 }
 
@@ -280,7 +283,8 @@ export function setMicState(isOn, message = '') {
   els.micStatus.textContent = message;   // role="status" reads it aloud
 }
 
-export function hideMicButton() {
-  els.btnMic.hidden = true;              // browser has no speech recognition: no dead button
+export function hideMicButton(hint) {
+  els.btnMic.hidden = true;
   els.voiceHelp.hidden = true;
+  els.micStatus.textContent = hint;    // visible text: tooltips do not work on touch screens
 }

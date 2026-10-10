@@ -28,8 +28,15 @@ body {
   min-height: 100dvh;
 }
 
-h1, h2, h3 { line-height: 1.25; margin: 0 0 var(--space-2); }
-h2 { font-size: 1.75rem; }
+h1, h2, h3 {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  letter-spacing: -0.015em;      /* big bold headings read better slightly tightened */
+  line-height: 1.2;
+  color: var(--color-heading);
+  margin: 0 0 var(--space-2);
+}
+h2 { font-size: 1.9rem; }
 h3 { font-size: 1.4rem; }
 p  { margin: 0 0 var(--space-2); }
 
@@ -38,17 +45,17 @@ p  { margin: 0 0 var(--space-2); }
   padding: var(--space-2);
   padding-top: calc(var(--space-2) + env(safe-area-inset-top, 0px));
   background: var(--color-surface);
-  border-bottom: 4px solid var(--color-primary);
+  border-bottom: 5px solid var(--color-primary);
+  box-shadow: 0 5px 0 var(--color-accent);        /* thin gold stripe under the terracotta line */
+  margin-bottom: 5px;
 }
-.brand { font-size: 1.4rem; margin: 0 0 var(--space-2); }
-.brand-name { display: inline; font-size: 1.9rem; color: var(--color-primary); }
-.brand-meaning { display: inline; }
+.brand { display: flex; align-items: center; gap: 0.75rem; margin: 0 0 var(--space-2); font-size: 1.15rem; }
+.brand-mark { flex: none; width: 3rem; height: 3rem; border-radius: 0.6rem; }
+.brand-text { display: block; }
+.brand-name { display: block; font-size: 1.9rem; line-height: 1.1; color: var(--color-primary); }
+.brand-meaning { display: block; font-family: var(--font-stack); font-weight: 600; letter-spacing: 0; color: var(--color-muted); }
 
-.header-actions {
-  display: flex;
-  flex-wrap: wrap;               /* wraps instead of overflowing when zoomed */
-  gap: var(--space-1);
-}
+.header-actions { display: flex; flex-wrap: wrap; gap: var(--space-1); }
 .header-actions .btn { flex: 1 1 10rem; }
 
 .mic-status { margin: var(--space-1) 0 0; min-height: 1.6em; font-weight: 700; }
@@ -57,7 +64,7 @@ p  { margin: 0 0 var(--space-2); }
 main {
   flex: 1;
   width: 100%;
-  max-width: 44rem;              /* readable line length on tablets/desktop */
+  max-width: 44rem;              /* readable line length on phones and tablets */
   margin-inline: auto;
   padding: var(--space-3) var(--space-2);
 }
@@ -82,15 +89,16 @@ main:focus { outline: none; }    /* focus moved here by JS; the heading is the v
 
 /* ---------- Footer ---------- */
 .app-footer {
-  padding: var(--space-2);
-  padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
-  font-size: 1rem;
+  padding: var(--space-3) var(--space-2);
+  padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  font-size: 1.05rem;
   color: var(--color-muted);
-  text-align: center;
+  background: var(--color-soft);
+  border-top: 5px solid var(--color-accent);
 }
-.app-footer p { margin-bottom: var(--space-1); }
+.app-footer p { max-width: 40rem; margin-inline: auto; margin-bottom: var(--space-1); }
 
-/* ---------- Wider screens: only small enhancements ---------- */
+/* ---------- Tablets and up: small enhancements ---------- */
 @media (min-width: 48rem) {
   .app-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); flex-wrap: wrap; }
   .brand { margin: 0; }
@@ -98,4 +106,13 @@ main:focus { outline: none; }    /* focus moved here by JS; the heading is the v
   .mic-status { flex-basis: 100%; }
   .nav-bar { justify-content: center; }
   .nav-bar .btn { max-width: 16rem; }
+}
+
+/* ---------- Desktops: wider page, guide cards side by side ---------- */
+@media (min-width: 60rem) {
+  main { max-width: 70rem; }
+  /* Reading screens stay narrow so lines never get too long. */
+  #view-guide, #view-magnifier { max-width: 44rem; margin-inline: auto; }
+  .card-list { grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); }
+  .tool-card { max-width: 36rem; }
 }
