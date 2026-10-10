@@ -133,15 +133,11 @@ Every reply looks like `{ "ok": true, "data": ... }` or `{ "ok": false, "error":
 - **The guides have not been checked against official sources.** The step wording and short codes are a first draft, and the costs table uses placeholder amounts. Check everything with MTN, the NHIA and ECG before relying on it.
 - **Step photos are not included yet.** The database and code support them. A step without a picture simply shows none.
 - **The ID magnifier uses a fixed 2× crop of the middle of the frame.** It does not detect the edges of a card.
-- The phone's own Back button leaves the app instead of going back a step.
 - Progress is not saved between visits.
-- A word-meaning dictionary (with AI-written explanations) was planned and left out for time.
+
 
 ## Testing
 
-- Lighthouse on an earlier build: performance 90, accessibility 100, best practices 100, SEO 100. Re-run after any big change.
+- Lighthouse on an earlier build: performance 88, accessibility 100, best practices 100, SEO 100
 - Checked by hand: all three guides end to end, settings and persistence after reload, the no-JavaScript redirect, camera permission allowed and blocked, and error messages when the database is unavailable.
 
-## Author
-
-Vladimir Aduama, Web Technologies
